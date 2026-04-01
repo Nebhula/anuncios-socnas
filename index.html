@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mercado Aviar - Anuncios Clasificados</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            background: linear-gradient(135deg, #1e3a2e, #0f2a1f);
+            color: white;
+            padding: 40px 30px;
+            border-radius: 24px 24px 0 0;
+            text-align: center;
+            cursor: pointer;
+        }
+        .header h1 { font-size: 2rem; font-weight: 600; }
+        .header p { opacity: 0.85; margin-top: 8px; }
+        .form-section {
+            background: white;
+            padding: 30px;
+            border-radius: 0 0 24px 24px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .form-section h3 {
+            color: #1e3a2e;
+            margin-bottom: 24px;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 180px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #4a5b4a;
+            text-transform: uppercase;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+        .image-preview {
+            margin-top: 12px;
+            max-width: 180px;
+            display: none;
+        }
+        .image-preview img { width: 100%; border-radius: 12px; }
+        .btn-submit {
+            background: #2c5e2e;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .search-section {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .search-bar input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 40px;
+        }
+        .search-bar button {
+            background: #2c5e2e;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding-top: 20px;
+            border-top: 1px solid #edf2f7;
+        }
+        .filter-btn {
+            background: #f1f5f9;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .filter-btn.active {
+            background: #2c5e2e;
+            color: white;
+        }
+        .anuncios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+        .anuncio-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .anuncio-card:hover { transform: translateY(-4px); }
+        .anuncio-imagen {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #f1f5f9;
+        }
+        .anuncio-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin: 16px 0 0 16px;
+        }
+        .badge-venta { background: #dcfce7; color: #166534; }
+        .badge-compra { background: #fef9c3; color: #854d0e; }
+        .badge-intercambio { background: #dbeafe; color: #1e40af; }
+        .anuncio-contenido { padding: 16px; }
+        .anuncio-titulo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e2a1e;
+            margin: 8px 0;
+        }
+        .anuncio-detalles {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin: 12px 0;
+            color: #4b5563;
+            font-size: 0.85rem;
+        }
+        .anuncio-detalles i { width: 18px; margin-right: 6px; color: #2c5e2e; }
+        .anuncio-descripcion {
+            margin: 12px 0;
+            color: #334155;
+            font-size: 0.9rem;
+            line-height: 1.45;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        /* Detalle */
+        .detalle-container {
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .detalle-imagen {
+            width: 100%;
+            max-height: 500px;
+            object-fit: cover;
+        }
+        .detalle-contenido { padding: 32px; }
+        .detalle-titulo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e2a1e;
+            margin-bottom: 16px;
+        }
+        .detalle-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            margin: 20px 0;
+            padding: 20px 0;
+            border-top: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .detalle-info-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1rem;
+        }
+        .detalle-info-item i { font-size: 1.2rem; color: #2c5e2e; }
+        .detalle-descripcion {
+            margin: 24px 0;
+            line-height: 1.6;
+            color: #334155;
+        }
+        .detalle-contacto-buttons {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+        .btn-wa, .btn-call {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 28px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        .btn-wa {
+            background: #25D366;
+            color: white;
+        }
+        .btn-wa:hover {
+            background: #128C7E;
+            transform: scale(1.02);
+        }
+        .btn-call {
+            background: #2c5e2e;
+            color: white;
+        }
+        .btn-call:hover {
+            background: #1e4520;
+        }
+        .back-button {
+            display: inline-block;
+            margin-bottom: 20px;
+            background: none;
+            border: none;
+            color: #2c5e2e;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .stats {
+            text-align: center;
+            margin-top: 30px;
+            color: #64748b;
+        }
+        .hidden { display: none; }
+        @media (max-width: 700px) {
+            .detalle-titulo { font-size: 1.3rem; }
+            .detalle-contenido { padding: 20px; }
+            .btn-wa, .btn-call { padding: 10px 20px; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div id="listadoView">
+        <div class="header" onclick="volverAListado()">
+            <h1>Mercado Aviar</h1>
+            <p>Anuncios clasificados para criadores de aves</p>
+        </div>
+
+        <div class="form-section">
+            <h3><i class="fas fa-plus-circle"></i> Publicar anuncio</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Tipo</label>
+                    <select id="anuncioTipo">
+                        <option value="venta">Venta</option>
+                        <option value="compra">Compra</option>
+                        <option value="intercambio">Intercambio</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" id="anuncioTitulo" placeholder="Ej: Canario rojo intenso">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Especie</label>
+                    <input type="text" id="anuncioEspecie" placeholder="Ej: Canario">
+                </div>
+                <div class="form-group">
+                    <label>Precio</label>
+                    <input type="text" id="anuncioPrecio" placeholder="Ej: 50€">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Provincia</label>
+                    <select id="anuncioProvincia">
+                        <option value="">Selecciona</option>
+                        <option value="Madrid">Madrid</option>
+                        <option value="Barcelona">Barcelona</option>
+                        <option value="Valencia">Valencia</option>
+                        <option value="Sevilla">Sevilla</option>
+                        <option value="Málaga">Málaga</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Teléfono (con prefijo)</label>
+                    <input type="text" id="anuncioTelefono" placeholder="Ej: 34666111222">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Foto</label>
+                <input type="file" id="anuncioImagen" accept="image/*" onchange="previewImage(event)">
+                <div class="image-preview" id="imagePreview"><img id="previewImg" src=""></div>
+            </div>
+            <div class="form-group">
+                <label>Descripción</label>
+                <textarea id="anuncioDescripcion" rows="3" placeholder="Describe el ave, edad, características..."></textarea>
+            </div>
+            <button class="btn-submit" onclick="publicarAnuncio()"><i class="fas fa-cloud-upload-alt"></i> Publicar</button>
+            <div id="successMsg" style="margin-top:15px; padding:12px; border-radius:12px; display:none;"></div>
+        </div>
+
+        <div class="search-section">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Buscar..." onkeyup="filtrar()">
+                <button onclick="filtrar()"><i class="fas fa-search"></i> Buscar</button>
+            </div>
+            <div class="filters" id="filterButtons">
+                <button class="filter-btn active" data-filter="all">Todos</button>
+                <button class="filter-btn" data-filter="venta">Venta</button>
+                <button class="filter-btn" data-filter="compra">Compra</button>
+                <button class="filter-btn" data-filter="intercambio">Intercambio</button>
+                <button class="filter-btn" data-filter="canarios">Canarios</button>
+                <button class="filter-btn" data-filter="jilgueros">Jilgueros</button>
+                <button class="filter-btn" data-filter="periquitos">Periquitos</button>
+            </div>
+        </div>
+
+        <div id="anunciosList" class="anuncios-grid"></div>
+        <div class="stats" id="stats"></div>
+    </div>
+
+    <div id="detalleView" class="hidden">
+        <button class="back-button" onclick="volverAListado()"><i class="fas fa-arrow-left"></i> Volver al listado</button>
+        <div id="detalleContenido"></div>
+    </div>
+</div>
+
+<script>
+    let anuncios = [];
+    let imagenSeleccionada = null;
+
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            imagenSeleccionada = file;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('imagePreview').style.display = 'block';
+                document.getElementById('previewImg').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function cargarAnuncios() {
+        const guardados = localStorage.getItem('mercado_aviar_detalle_v2');
+        if (guardados) {
+            anuncios = JSON.parse(guardados);
+        } else {
+            anuncios = [
+                { id: 1, tipo: "venta", titulo: "Canario rojo intenso", especie: "canario", precio: "45€", provincia: "Madrid", telefono: "34666111222", descripcion: "Canario rojo de 1 año, anillado. Muy buen cantor. Certificado sanitario.", imagen: "https://picsum.photos/id/100/800/500", fecha: "2025-03-28" },
+                { id: 2, tipo: "compra", titulo: "Busco hembra de jilguero", especie: "jilguero", precio: "Negociable", provincia: "Barcelona", telefono: "34666333444", descripcion: "Busco hembra de jilguero ibérico para cría. Preferiblemente anillada.", imagen: "https://picsum.photos/id/101/800/500", fecha: "2025-03-27" },
+                { id: 3, tipo: "intercambio", titulo: "Intercambio periquitos por jaula", especie: "periquito", precio: "Intercambio", provincia: "Valencia", telefono: "34666555666", descripcion: "2 periquitos australianos jóvenes. Busco jaula grande.", imagen: "https://picsum.photos/id/102/800/500", fecha: "2025-03-26" }
+            ];
+            guardarAnuncios();
+        }
+        mostrarAnuncios(anuncios);
+    }
+
+    function guardarAnuncios() {
+        localStorage.setItem('mercado_aviar_detalle_v2', JSON.stringify(anuncios));
+    }
+
+    function limpiarFormulario() {
+        document.getElementById('anuncioTitulo').value = '';
+        document.getElementById('anuncioEspecie').value = '';
+        document.getElementById('anuncioPrecio').value = '';
+        document.getElementById('anuncioProvincia').value = '';
+        document.getElementById('anuncioTelefono').value = '';
+        document.getElementById('anuncioDescripcion').value = '';
+        document.getElementById('anuncioImagen').value = '';
+        document.getElementById('imagePreview').style.display = 'none';
+        imagenSeleccionada = null;
+    }
+
+    function publicarAnuncio() {
+        const tipo = document.getElementById('anuncioTipo').value;
+        const titulo = document.getElementById('anuncioTitulo').value.trim();
+        const especie = document.getElementById('anuncioEspecie').value.trim().toLowerCase();
+        const precio = document.getElementById('anuncioPrecio').value.trim();
+        const provincia = document.getElementById('anuncioProvincia').value;
+        let telefono = document.getElementById('anuncioTelefono').value.trim();
+        const descripcion = document.getElementById('anuncioDescripcion').value.trim();
+
+        if (!titulo || !especie || !provincia || !telefono || !descripcion) {
+            alert("Completa todos los campos");
+            return;
+        }
+        if (!telefono.startsWith('34')) telefono = '34' + telefono.replace(/\D/g, '');
+        
+        const procesar = (imgUrl) => {
+            const nuevo = {
+                id: Date.now(), tipo, titulo, especie, precio: precio || "No especificado",
+                provincia, telefono, descripcion, imagen: imgUrl,
+                fecha: new Date().toISOString().split('T')[0]
+            };
+            anuncios.unshift(nuevo);
+            guardarAnuncios();
+            limpiarFormulario();
+            mostrarMensaje("Anuncio publicado");
+            filtrar();
+        };
+
+        if (imagenSeleccionada) {
+            const reader = new FileReader();
+            reader.onload = (e) => procesar(e.target.result);
+            reader.readAsDataURL(imagenSeleccionada);
+        } else {
+            procesar("https://picsum.photos/id/20/800/500");
+        }
+    }
+
+    function mostrarMensaje(texto) {
+        const msg = document.getElementById('successMsg');
+        msg.textContent = texto;
+        msg.style.backgroundColor = "#dcfce7";
+        msg.style.display = "block";
+        setTimeout(() => msg.style.display = "none", 3000);
+    }
+
+    let filtroActual = "all";
+    let textoBusqueda = "";
+
+    function filtrar() {
+        textoBusqueda = document.getElementById("searchInput").value.toLowerCase();
+        const resultados = anuncios.filter(a => {
+            if (filtroActual !== "all") {
+                if (["venta","compra","intercambio"].includes(filtroActual)) {
+                    if (a.tipo !== filtroActual) return false;
+                } else {
+                    if (!a.especie.includes(filtroActual)) return false;
+                }
+            }
+            if (textoBusqueda) {
+                const coincide = a.titulo.toLowerCase().includes(textoBusqueda) ||
+                                 a.especie.includes(textoBusqueda) ||
+                                 a.provincia.toLowerCase().includes(textoBusqueda);
+                if (!coincide) return false;
+            }
+            return true;
+        });
+        mostrarAnuncios(resultados);
+    }
+
+    function mostrarAnuncios(lista) {
+        const div = document.getElementById('anunciosList');
+        if (lista.length === 0) {
+            div.innerHTML = '<div style="text-align:center; padding:60px;">No hay anuncios</div>';
+            document.getElementById('stats').innerHTML = '';
+            return;
+        }
+        let html = '';
+        lista.forEach(a => {
+            let badgeClass = '', badgeText = '', badgeIcon = '';
+            if (a.tipo === 'venta') { badgeClass = 'badge-venta'; badgeText = 'Venta'; badgeIcon = 'fa-tag'; }
+            if (a.tipo === 'compra') { badgeClass = 'badge-compra'; badgeText = 'Compra'; badgeIcon = 'fa-shopping-cart'; }
+            if (a.tipo === 'intercambio') { badgeClass = 'badge-intercambio'; badgeText = 'Intercambio'; badgeIcon = 'fa-exchange-alt'; }
+            html += `
+                <div class="anuncio-card" onclick="verDetalle(${a.id})">
+                    <img class="anuncio-imagen" src="${a.imagen}" onerror="this.src='https://picsum.photos/id/20/400/300'">
+                    <div class="anuncio-badge ${badgeClass}"><i class="fas ${badgeIcon}"></i> ${badgeText}</div>
+                    <div class="anuncio-contenido">
+                        <div class="anuncio-titulo">${a.titulo}</div>
+                        <div class="anuncio-detalles">
+                            <span><i class="fas fa-dove"></i> ${a.especie}</span>
+                            <span><i class="fas fa-map-marker-alt"></i> ${a.provincia}</span>
+                            <span><i class="fas fa-coins"></i> ${a.precio}</span>
+                        </div>
+                        <div class="anuncio-descripcion">${a.descripcion}</div>
+                    </div>
+                </div>
+            `;
+        });
+        div.innerHTML = html;
+        document.getElementById('stats').innerHTML = `Mostrando ${lista.length} de ${anuncios.length} anuncios`;
+    }
+
+    function verDetalle(id) {
+        const a = anuncios.find(a => a.id === id);
+        if (!a) return;
+
+        let badgeClass = '', badgeText = '', badgeIcon = '';
+        if (a.tipo === 'venta') { badgeClass = 'badge-venta'; badgeText = 'Venta'; badgeIcon = 'fa-tag'; }
+        if (a.tipo === 'compra') { badgeClass = 'badge-compra'; badgeText = 'Compra'; badgeIcon = 'fa-shopping-cart'; }
+        if (a.tipo === 'intercambio') { badgeClass = 'badge-intercambio'; badgeText = 'Intercambio'; badgeIcon = 'fa-exchange-alt'; }
+
+        const mensajeWhatsApp = encodeURIComponent(`Hola, vi tu anuncio "${a.titulo}" en Mercado Aviar. Me interesa. ¿Podemos hablar?`);
+        const whatsappUrl = `https://wa.me/${a.telefono}?text=${mensajeWhatsApp}`;
+        const llamarUrl = `tel:${a.telefono}`;
+
+        const detalleHtml = `
+            <div class="detalle-container">
+                <img class="detalle-imagen" src="${a.imagen}" onerror="this.src='https://picsum.photos/id/20/800/500'">
+                <div class="detalle-contenido">
+                    <div class="anuncio-badge ${badgeClass}" style="margin:0 0 16px 0; display:inline-block;"><i class="fas ${badgeIcon}"></i> ${badgeText}</div>
+                    <div class="detalle-titulo">${a.titulo}</div>
+                    <div class="detalle-info">
+                        <div class="detalle-info-item"><i class="fas fa-dove"></i> <strong>Especie:</strong> ${a.especie}</div>
+                        <div class="detalle-info-item"><i class="fas fa-coins"></i> <strong>Precio:</strong> ${a.precio}</div>
+                        <div class="detalle-info-item"><i class="fas fa-map-marker-alt"></i> <strong>Provincia:</strong> ${a.provincia}</div>
+                        <div class="detalle-info-item"><i class="far fa-calendar-alt"></i> <strong>Publicado:</strong> ${a.fecha}</div>
+                    </div>
+                    <div class="detalle-descripcion"><strong>Descripción:</strong><br>${a.descripcion}</div>
+                    <div class="detalle-contacto-buttons">
+                        <a href="${whatsappUrl}" target="_blank" class="btn-wa"><i class="fab fa-whatsapp"></i> Contactar por WhatsApp</a>
+                        <a href="${llamarUrl}" class="btn-call"><i class="fas fa-phone-alt"></i> Llamar por teléfono</a>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.getElementById('detalleContenido').innerHTML = detalleHtml;
+        document.getElementById('listadoView').classList.add('hidden');
+        document.getElementById('detalleView').classList.remove('hidden');
+        window.scrollTo(0, 0);
+    }
+
+    function volverAListado() {
+        document.getElementById('listadoView').classList.remove('hidden');
+        document.getElementById('detalleView').classList.add('hidden');
+        filtrar();
+    }
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            filtroActual = this.getAttribute('data-filter');
+            filtrar();
+        });
+    });
+
+    window.verDetalle = verDetalle;
+    window.volverAListado = volverAListado;
+    window.publicarAnuncio = publicarAnuncio;
+    window.filtrar = filtrar;
+
+    cargarAnuncios();
+</script>
+</body>
+</html>
