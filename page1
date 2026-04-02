@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📖 ReadLater Pro - Lee sin distracciones</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0f172a;
+      min-height: 100vh;
+      padding: 20px;
+      color: #e2e8f0;
+    }
+    
+    .container { max-width: 1000px; margin: 0 auto; }
+    
+    /* HEADER */
+    .header {
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      border-radius: 16px;
+      padding: 35px;
+      margin-bottom: 25px;
+      border: 1px solid #475569;
+      text-align: center;
+    }
+    
+    .header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    
+    .header p { color: #94a3b8; font-size: 15px; }
+    
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 25px;
+      padding-top: 25px;
+      border-top: 1px solid #475569;
+    }
+    
+    .stat-number { font-size: 28px; font-weight: 700; color: #60a5fa; }
+    .stat-label { font-size: 12px; color: #64748b; text-transform: uppercase; margin-top: 5px; }
+    
+    /* FORM */
+    .form-box {
+      background: #1e293b;
+      padding: 30px;
+      border-radius: 16px;
+      margin-bottom: 25px;
+      border: 1px solid #475569;
+    }
+    
+    .form-box h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #f1f5f9;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .form-box h3 i { color: #60a5fa; }
+    
+    .form-row { display: grid; grid-template-columns: 3fr 1fr; gap: 15px; }
+    
+    .form-group { margin-bottom: 0; }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #cbd5e1;
+      font-size: 14px;
+    }
+    
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 14px 16px;
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #f1f5f9;
+      font-family: inherit;
+    }
+    
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+    }
+    
+    .btn-submit {
+      background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+      color: white;
+      border: none;
+      padding: 16px 30px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(96, 165, 250, 0.3); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    
+    /* LOADING */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      margin-top: 20px;
+      background: rgba(96, 165, 250, 0.1);
+      border-radius: 10px;
+      border: 1px solid rgba(96, 165, 250, 0.3);
+    }
+    
+    .loading.active { display: block; }
+    
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #475569;
+      border-top-color: #60a5fa;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+    
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { color: #94a3b8; font-size: 14px; }
+    
+    /* ALERTS */
+    .alert {
+      padding: 16px 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .alert-success { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+    .alert-error { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .hidden { display: none; }
+    
+    /* TABS */
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .tab-btn {
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #94a3b8;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+    
+    .tab-btn.active {
+      background: #60a5fa;
+      border-color: #60a5fa;
+      color: white;
+    }
+    
+    /* ARTICLE LIST */
+    .article-list { display: grid; gap: 15px; }
+    
+    .article-card {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid #475569;
+      transition: all 0.3s;
+      display: grid;
+      grid-template-columns: 80px 1fr auto;
+      gap: 20px;
+      align-items: center;
+    }
+    
+    .article-card:hover {
+      border-color: #60a5fa;
+      transform: translateY(-2px);
+    }
+    
+    .article-card.read {
+      opacity: 0.6;
+    }
+    
+    .article-img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #0f172a;
+    }
+    
+    .article-info h4 {
+      color: #f1f5f9;
+      font-size: 16px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    
+    .article-meta {
+      display: flex;
+      gap: 15px;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+    
+    .read-time {
+      background: rgba(96, 165, 250, 0.15);
+      color: #60a5fa;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .article-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .btn-read {
+      background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+      color: white;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    
+    .btn-read:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(96, 165, 250, 0.4); }
+    
+    .btn-delete {
+      background: #0f172a;
+      border: 1px solid #475569;
+      color: #94a3b8;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.3s;
+    }
+    
+    .btn-delete:hover { background: #ef4444; border-color: #ef4444; color: white; }
+    
+    .btn-mark {
+      background: #0f172a;
+      border: 1px solid #475569;
+      color: #94a3b8;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.3s;
+    }
+    
+    .btn-mark:hover { background: #22c55e; border-color: #22c55e; color: white; }
+    
+    /* READING MODE */
+    .reading-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #0f172a;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+    
+    .reading-modal.active { display: block; }
+    
+    .reading-content {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    
+    .reading-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #475569;
+    }
+    
+    .reading-controls {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .control-btn {
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #94a3b8;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .control-btn:hover { background: #60a5fa; border-color: #60a5fa; color: white; }
+    
+    .btn-close {
+      background: #ef4444;
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    
+    .article-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+    
+    .article-meta-reading {
+      color: #94a3b8;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+    
+    .article-body {
+      font-size: 18px;
+      line-height: 1.8;
+      color: #e2e8f0;
+    }
+    
+    .article-body p { margin-bottom: 20px; }
+    
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      background: #1e293b;
+      border-radius: 16px;
+      border: 1px solid #475569;
+    }
+    
+    .empty-state i { font-size: 64px; color: #475569; margin-bottom: 20px; }
+    .empty-state h3 { color: #f1f5f9; margin-bottom: 10px; font-size: 22px; }
+    .empty-state p { color: #94a3b8; font-size: 15px; }
+    
+    /* FOOTER */
+    .footer {
+      text-align: center;
+      padding: 30px;
+      color: #64748b;
+      font-size: 13px;
+      margin-top: 40px;
+      border-top: 1px solid #475569;
+    }
+    
+    @media (max-width: 768px) {
+      .form-row { grid-template-columns: 1fr; }
+      .article-card { grid-template-columns: 1fr; }
+      .article-img { width: 100%; height: 150px; }
+      .stats { gap: 25px; }
+      .header h1 { font-size: 26px; }
+      .article-title { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- HEADER -->
+    <div class="header">
+      <h1><i class="fa-solid fa-book-open"></i> ReadLater Pro</h1>
+      <p>Guarda artículos. Lee sin distracciones. Para siempre.</p>
+      
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-number" id="totalArticles">0</div>
+          <div class="stat-label"><i class="fa-solid fa-file-lines"></i> Artículos</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="totalRead">0</div>
+          <div class="stat-label"><i class="fa-solid fa-check"></i> Leídos</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="totalTime">0 min</div>
+          <div class="stat-label"><i class="fa-regular fa-clock"></i> Tiempo leído</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALERT BOX -->
+    <div id="alertBox" class="alert hidden"></div>
+
+    <!-- FORM -->
+    <div class="form-box">
+      <h3><i class="fa-solid fa-plus-circle"></i> Guardar Nuevo Artículo</h3>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label><i class="fa-solid fa-link"></i> URL del Artículo</label>
+          <input type="url" id="articleUrl" placeholder="https://theverge.com/tech/ai-article">
+        </div>
+        
+        <div class="form-group">
+          <label><i class="fa-solid fa-folder"></i> Carpeta</label>
+          <select id="articleFolder">
+            <option value="general">📁 General</option>
+            <option value="tech">💻 Tecnología</option>
+            <option value="business">💼 Negocios</option>
+            <option value="science">🔬 Ciencia</option>
+            <option value="personal">📚 Desarrollo Personal</option>
+          </select>
+        </div>
+      </div>
+      
+      <button class="btn-submit" id="submitBtn" onclick="saveArticle()">
+        <i class="fa-solid fa-bookmark"></i>
+        <span>Guardar Artículo</span>
+      </button>
+      
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p class="loading-text">Extrayendo contenido del artículo...</p>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="filterArticles('all')">📚 Todos</button>
+      <button class="tab-btn" onclick="filterArticles('unread')">📖 Por Leer</button>
+      <button class="tab-btn" onclick="filterArticles('read')">✅ Leídos</button>
+    </div>
+
+    <!-- ARTICLE LIST -->
+    <div class="article-list" id="articleList"></div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <p><i class="fa-solid fa-bolt"></i> Contenido limpio, sin anuncios, sin distracciones</p>
+    </div>
+
+  </div>
+
+  <!-- READING MODAL -->
+  <div class="reading-modal" id="readingModal">
+    <div class="reading-content">
+      <div class="reading-header">
+        <button class="btn-close" onclick="closeReading()">← Volver</button>
+        <div class="reading-controls">
+          <button class="control-btn" onclick="changeFontSize(-1)">A-</button>
+          <button class="control-btn" onclick="changeFontSize(1)">A+</button>
+          <button class="control-btn" onclick="toggleTheme()">🌙</button>
+        </div>
+      </div>
+      
+      <h1 class="article-title" id="readingTitle"></h1>
+      <div class="article-meta-reading" id="readingMeta"></div>
+      <div class="article-body" id="readingBody"></div>
+    </div>
+  </div>
+
+  <script>
+    // Datos de ejemplo
+    let articles = [
+      {
+        id: 1,
+        title: "El Futuro de la IA en 2025",
+        url: "https://theverge.com/ai-2025",
+        image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=200",
+        folder: "tech",
+        readTime: 8,
+        status: "unread",
+        content: "La inteligencia artificial está transformando cada aspecto de nuestras vidas. Desde asistentes virtuales hasta vehículos autónomos, los avances son impresionantes. Los expertos predicen que 2025 será el año donde la IA se vuelva verdaderamente omnipresente en nuestra vida diaria.",
+        savedAt: "2024-01-15",
+        readAt: null
+      },
+      {
+        id: 2,
+        title: "Cómo Construir un Negocio SaaS Exitoso",
+        url: "https://medium.com/saas-business",
+        image: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=200",
+        folder: "business",
+        readTime: 12,
+        status: "read",
+        content: "Construir un negocio SaaS requiere más que una buena idea. Necesitas validación del mercado, un producto que resuelva un problema real, y una estrategia de crecimiento sostenible. En este artículo exploramos los fundamentos.",
+        savedAt: "2024-01-14",
+        readAt: "2024-01-15"
+      },
+      {
+        id: 3,
+        title: "Técnicas de Productividad para Desarrolladores",
+        url: "https://dev.to/productivity",
+        image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=200",
+        folder: "personal",
+        readTime: 6,
+        status: "unread",
+        content: "La productividad no se trata de trabajar más horas, sino de trabajar de manera más inteligente. Técnicas como Pomodoro, time blocking, y deep work pueden transformar tu flujo de trabajo como desarrollador.",
+        savedAt: "2024-01-13",
+        readAt: null
+      }
+    ];
+
+    let currentFontSize = 18;
+    let isDarkTheme = true;
+
+    // Update stats
+    function updateStats() {
+      document.getElementById('totalArticles').textContent = articles.length;
+      document.getElementById('totalRead').textContent = articles.filter(a => a.status === 'read').length;
+      
+      const totalTime = articles
+        .filter(a => a.status === 'read')
+        .reduce((sum, a) => sum + a.readTime, 0);
+      
+      document.getElementById('totalTime').textContent = totalTime + ' min';
+    }
+
+    // Load on start
+    window.onload = function() { 
+      renderArticles('all'); 
+      updateStats(); 
+    };
+
+    // Render articles
+    function renderArticles(filter) {
+      const container = document.getElementById('articleList');
+      
+      let filtered = articles;
+      if (filter === 'unread') filtered = articles.filter(a => a.status === 'unread');
+      if (filter === 'read') filtered = articles.filter(a => a.status === 'read');
+      
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fa-regular fa-folder-open"></i>
+            <h3>No hay artículos</h3>
+            <p>${filter === 'unread' ? '¡Todos leídos!' : 'Guarda tu primer artículo'}</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = '';
+
+      filtered.forEach(article => {
+        const card = document.createElement('div');
+        card.className = 'article-card' + (article.status === 'read' ? ' read' : '');
+        
+        const folderEmojis = {
+          general: '📁',
+          tech: '💻',
+          business: '💼',
+          science: '🔬',
+          personal: '📚'
+        };
+        
+        card.innerHTML = `
+          <img src="${article.image}" alt="${article.title}" class="article-img">
+          
+          <div class="article-info">
+            <h4>${article.title}</h4>
+            <div class="article-meta">
+              <span class="read-time"><i class="fa-regular fa-clock"></i> ${article.readTime} min</span>
+              <span><i class="fa-regular fa-folder"></i> ${folderEmojis[article.folder]} ${article.folder}</span>
+              <span><i class="fa-regular fa-calendar"></i> ${article.savedAt}</span>
+              ${article.status === 'read' ? `<span><i class="fa-solid fa-check"></i> Leído ${article.readAt}</span>` : ''}
+            </div>
+          </div>
+          
+          <div class="article-actions">
+            ${article.status === 'unread' ? `
+              <a href="#" class="btn-read" onclick="openReading(${article.id})"><i class="fa-solid fa-book-open"></i> Leer</a>
+            ` : ''}
+            <button class="btn-mark" onclick="toggleRead(${article.id})">
+              <i class="fa-solid ${article.status === 'read' ? 'fa-rotate-left' : 'fa-check'}"></i>
+              ${article.status === 'read' ? 'Marcar como no leído' : 'Marcar como leído'}
+            </button>
+            <button class="btn-delete" onclick="deleteArticle(${article.id})"><i class="fa-regular fa-trash-can"></i> Eliminar</button>
+          </div>
+        `;
+        
+        container.appendChild(card);
+      });
+    }
+
+    // Save article
+    async function saveArticle() {
+      const url = document.getElementById('articleUrl').value.trim();
+      const folder = document.getElementById('articleFolder').value;
+      const submitBtn = document.getElementById('submitBtn');
+      const loading = document.getElementById('loading');
+
+      if (!url) {
+        showAlert('⚠️ Introduce una URL válida', 'error');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      loading.classList.add('active');
+
+      // Simular extracción (2 segundos)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // En producción, aquí llamarías a microlink.io o tu Worker
+      const newArticle = {
+        id: Date.now(),
+        title: "Artículo Guardado - " + new URL(url).hostname,
+        url: url,
+        image: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=200",
+        folder: folder,
+        readTime: Math.floor(Math.random() * 10) + 5,
+        status: "unread",
+        content: "Este es el contenido del artículo. En producción, esto se extraería automáticamente de la URL usando microlink.io o un Worker propio. El texto estaría limpio, sin anuncios, listo para leer.",
+        savedAt: new Date().toISOString().split('T')[0],
+        readAt: null
+      };
+
+      articles.unshift(newArticle);
+      renderArticles('all');
+      updateStats();
+
+      document.getElementById('articleUrl').value = '';
+      loading.classList.remove('active');
+      submitBtn.disabled = false;
+      
+      showAlert('✅ Artículo guardado. Listo para leer sin distracciones.', 'success');
+    }
+
+    // Toggle read status
+    function toggleRead(id) {
+      const article = articles.find(a => a.id === id);
+      if (article) {
+        article.status = article.status === 'read' ? 'unread' : 'read';
+        article.readAt = article.status === 'read' ? new Date().toISOString().split('T')[0] : null;
+        renderArticles('all');
+        updateStats();
+      }
+    }
+
+    // Delete article
+    function deleteArticle(id) {
+      articles = articles.filter(a => a.id !== id);
+      renderArticles('all');
+      updateStats();
+      showAlert('🗑️ Artículo eliminado', 'success');
+    }
+
+    // Filter articles
+    function filterArticles(filter) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      renderArticles(filter);
+    }
+
+    // Open reading mode
+    function openReading(id) {
+      const article = articles.find(a => a.id === id);
+      if (article) {
+        document.getElementById('readingTitle').textContent = article.title;
+        document.getElementById('readingMeta').textContent = `${article.readTime} min de lectura | Guardado el ${article.savedAt}`;
+        document.getElementById('readingBody').innerHTML = `<p>${article.content}</p><p><a href="${article.url}" target="_blank" style="color: #60a5fa;">Leer artículo original →</a></p>`;
+        document.getElementById('readingModal').classList.add('active');
+        
+        // Marcar como leído
+        article.status = 'read';
+        article.readAt = new Date().toISOString().split('T')[0];
+        updateStats();
+      }
+    }
+
+    // Close reading mode
+    function closeReading() {
+      document.getElementById('readingModal').classList.remove('active');
+      renderArticles('all');
+    }
+
+    // Change font size
+    function changeFontSize(delta) {
+      currentFontSize += delta;
+      if (currentFontSize < 14) currentFontSize = 14;
+      if (currentFontSize > 24) currentFontSize = 24;
+      document.getElementById('readingBody').style.fontSize = currentFontSize + 'px';
+    }
+
+    // Toggle theme
+    function toggleTheme() {
+      isDarkTheme = !isDarkTheme;
+      const modal = document.getElementById('readingModal');
+      const body = document.getElementById('readingBody');
+      
+      if (isDarkTheme) {
+        modal.style.background = '#0f172a';
+        body.style.color = '#e2e8f0';
+      } else {
+        modal.style.background = '#ffffff';
+        body.style.color = '#1e293b';
+      }
+    }
+
+    // Show alert
+    function showAlert(msg, type) {
+      const box = document.getElementById('alertBox');
+      box.textContent = msg;
+      box.className = 'alert alert-' + type;
+      box.classList.remove('hidden');
+      setTimeout(() => box.classList.add('hidden'), 4000);
+    }
+  </script>
+</body>
+</html>
+
