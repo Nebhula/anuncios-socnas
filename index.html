@@ -141,52 +141,61 @@
     .alert-error { background: rgba(239, 68, 68, 0.2); color: #f87171; }
     .hidden { display: none; }
     
-    /* ===== FILTERS MEJORADOS ===== */
+    /* ===== FILTERS CON SCROLL ===== */
     .filters {
       display: flex;
       gap: 10px;
       margin-bottom: 20px;
-      flex-wrap: nowrap; /* ← IMPORTANTE: no wrap */
-      overflow-x: auto;  /* ← Scroll horizontal */
-      padding-bottom: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding: 5px 15px 10px 15px;
       scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch; /* Smooth en iOS */
+      -webkit-overflow-scrolling: touch;
+      max-width: 100%;
+      position: relative;
     }
     
-    /* Ocultar scrollbar pero mantener funcionalidad */
-    .filters::-webkit-scrollbar {
-      height: 4px;
+    .filters::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 40px;
+      height: 100%;
+      background: linear-gradient(to right, transparent, rgba(15, 23, 42, 0.9));
+      pointer-events: none;
+      border-radius: 0 10px 10px 0;
     }
-    .filters::-webkit-scrollbar-track {
-      background: rgba(255,255,255,0.05);
-      border-radius: 2px;
-    }
-    .filters::-webkit-scrollbar-thumb {
-      background: rgba(96, 165, 250, 0.5);
-      border-radius: 2px;
-    }
+    
+    .filters::-webkit-scrollbar { height: 5px; }
+    .filters::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 3px; }
+    .filters::-webkit-scrollbar-thumb { background: rgba(96, 165, 250, 0.6); border-radius: 3px; }
+    .filters::-webkit-scrollbar-thumb:hover { background: rgba(96, 165, 250, 0.9); }
     
     .filter-group {
-      display: flex;
+      display: inline-flex;
       gap: 6px;
       background: rgba(255,255,255,0.05);
-      padding: 5px;
+      padding: 5px 10px;
       border-radius: 10px;
-      flex-shrink: 0; /* ← No encoger */
+      flex-shrink: 0;
+      white-space: nowrap;
     }
     
     .filter-btn {
       background: transparent;
       border: none;
       color: #94a3b8;
-      padding: 8px 16px; /* ← Un poco más ancho */
+      padding: 8px 16px;
       border-radius: 8px;
       cursor: pointer;
       font-size: 13px;
       font-weight: 600;
-      white-space: nowrap; /* ← Texto en una línea */
+      white-space: nowrap;
       flex-shrink: 0;
       transition: all 0.2s;
+      min-width: 95px;
+      text-align: center;
     }
     
     .filter-btn:hover, .filter-btn.active { 
@@ -201,8 +210,8 @@
       font-size: 13px;
       margin-left: auto;
       flex-shrink: 0;
+      white-space: nowrap;
     }
-    /* =========================== */
     
     /* GRID LAYOUT */
     .articles-grid {
@@ -483,34 +492,13 @@
     /* MEDIA QUERIES */
     @media (max-width: 768px) {
       body { padding: 10px; }
-      
       .form-row { grid-template-columns: 1fr; }
-      
-      .btn-submit {
-        width: 100%;
-        justify-content: center;
-      }
-      
+      .btn-submit { width: 100%; justify-content: center; }
       .articles-grid { grid-template-columns: 1fr; }
-      
       .card-image { height: 200px; }
-      
-      .filters {
-        flex-wrap: nowrap; /* ← Mantener scroll en móvil */
-      }
-      
-      .filter-group {
-        width: auto; /* ← No forzar full width */
-        overflow-x: auto;
-      }
-      
-      .stats {
-        margin-left: 0;
-        width: 100%;
-        justify-content: space-between;
-        margin-top: 10px;
-      }
-      
+      .filters { flex-wrap: nowrap; }
+      .filter-group { width: auto; overflow-x: auto; }
+      .stats { margin-left: 0; width: 100%; justify-content: space-between; margin-top: 10px; }
       .reading-title { font-size: 20px; }
       .reading-image { max-height: 250px; }
       .reading-controls { width: 100%; justify-content: center; }
@@ -549,7 +537,6 @@
         </div>
         <div class="form-group">
           <i class="fa-solid fa-folder"></i>
-          <!-- === SELECT SIN EMOJIS (PRO) === -->
           <select id="articleCategory">
             <option value="tech">Tecnología</option>
             <option value="science">Ciencia</option>
@@ -560,7 +547,6 @@
             <option value="sports">Deportes</option>
             <option value="other">Otros</option>
           </select>
-          <!-- ============================== -->
         </div>
         <button class="btn-submit" id="submitBtn" onclick="saveArticle()">
           <i class="fa-solid fa-bookmark"></i>
@@ -574,7 +560,6 @@
       </div>
     </div>
 
-    <!-- === FILTERS CON SCROLL HORIZONTAL === -->
     <div class="filters">
       <div class="filter-group">
         <button class="filter-btn active" onclick="filterCategory('all')">Todos</button>
@@ -603,7 +588,6 @@
         </div>
       </div>
     </div>
-    <!-- ==================================== -->
 
     <div class="articles-grid" id="articleList"></div>
 
@@ -635,7 +619,6 @@
   </div>
 
   <script>
-    // === CATEGORÍAS (iconos SOLO para badges, NO para select) ===
     const categories = {
       tech: { icon: 'fa-laptop', name: 'Tecnología', color: '#60a5fa' },
       science: { icon: 'fa-flask', name: 'Ciencia', color: '#10b981' },
@@ -674,35 +657,23 @@
 
     window.onload = function() { 
       renderArticles(); 
-      updateStats(); 
+      updateStats();
+      updateFiltersScroll();
     };
 
     function renderArticles() {
       const container = document.getElementById('articleList');
       
       let filtered = articles;
-      
-      if (currentCategory !== 'all') {
-        filtered = filtered.filter(a => a.category === currentCategory);
-      }
-      
-      if (currentStatus !== 'all') {
-        filtered = filtered.filter(a => a.status === currentStatus);
-      }
+      if (currentCategory !== 'all') filtered = filtered.filter(a => a.category === currentCategory);
+      if (currentStatus !== 'all') filtered = filtered.filter(a => a.status === currentStatus);
       
       if (filtered.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <i class="fa-solid fa-inbox"></i>
-            <h3>No hay artículos</h3>
-            <p>${currentStatus === 'unread' ? '¡Todos leídos! 🎉' : 'Guarda tu primer artículo'}</p>
-          </div>
-        `;
+        container.innerHTML = `<div class="empty-state"><i class="fa-solid fa-inbox"></i><h3>No hay artículos</h3><p>${currentStatus === 'unread' ? '¡Todos leídos! 🎉' : 'Guarda tu primer artículo'}</p></div>`;
         return;
       }
 
       container.innerHTML = '';
-      
       filtered.sort((a, b) => {
         if (a.status === 'unread' && b.status === 'read') return -1;
         if (a.status === 'read' && b.status === 'unread') return 1;
@@ -717,40 +688,20 @@
         card.innerHTML = `
           <div class="card-image">
             <img src="${article.image || 'https://via.placeholder.com/400x200'}" alt="" onerror="this.src='https://via.placeholder.com/400x200'">
-            <div class="card-badge">
-              <i class="fa-solid ${cat.icon}"></i>
-              ${cat.name}
-            </div>
+            <div class="card-badge"><i class="fa-solid ${cat.icon}"></i> ${cat.name}</div>
             ${article.status === 'read' ? '<div class="card-badge" style="left:auto;right:8px;background:rgba(34,197,94,0.9)"><i class="fa-solid fa-check"></i></div>' : ''}
           </div>
-          
           <div class="card-content">
             <h3 class="card-title">${article.title}</h3>
-            
-            <div class="card-meta">
-              <span><i class="fa-regular fa-clock"></i> ${article.readTime} min</span>
-              <span><i class="fa-regular fa-calendar"></i> ${article.savedAt}</span>
-            </div>
-            
+            <div class="card-meta"><span><i class="fa-regular fa-clock"></i> ${article.readTime} min</span><span><i class="fa-regular fa-calendar"></i> ${article.savedAt}</span></div>
             <p class="card-description">${article.content}</p>
-            
             <div class="card-actions">
-              ${article.status === 'unread' ? `
-                <button class="btn-card btn-read" onclick="openReading(${article.id})">
-                  <i class="fa-solid fa-book-open"></i> Leer
-                </button>
-              ` : ''}
-              <button class="btn-card btn-mark" onclick="toggleRead(${article.id})">
-                <i class="fa-solid ${article.status === 'read' ? 'fa-rotate-left' : 'fa-check'}"></i>
-                ${article.status === 'read' ? 'No leído' : 'Leído'}
-              </button>
-              <button class="btn-card btn-delete" onclick="deleteArticle(${article.id})">
-                <i class="fa-solid fa-trash"></i>
-              </button>
+              ${article.status === 'unread' ? `<button class="btn-card btn-read" onclick="openReading(${article.id})"><i class="fa-solid fa-book-open"></i> Leer</button>` : ''}
+              <button class="btn-card btn-mark" onclick="toggleRead(${article.id})"><i class="fa-solid ${article.status === 'read' ? 'fa-rotate-left' : 'fa-check'}"></i> ${article.status === 'read' ? 'No leído' : 'Leído'}</button>
+              <button class="btn-card btn-delete" onclick="deleteArticle(${article.id})"><i class="fa-solid fa-trash"></i></button>
             </div>
           </div>
         `;
-        
         container.appendChild(card);
       });
     }
@@ -761,10 +712,7 @@
       const submitBtn = document.getElementById('submitBtn');
       const loading = document.getElementById('loading');
 
-      if (!url) {
-        showAlert('⚠️ Introduce una URL válida', 'error');
-        return;
-      }
+      if (!url) { showAlert('⚠️ Introduce una URL válida', 'error'); return; }
 
       submitBtn.disabled = true;
       loading.classList.add('active');
@@ -775,7 +723,6 @@
         const data = await response.json();
         
         let title, description, image;
-        
         if (data.status === 'success') {
           title = data.data.title || 'Artículo sin título';
           description = data.data.description || 'Sin descripción disponible';
@@ -787,16 +734,10 @@
         }
         
         const newArticle = {
-          id: Date.now(),
-          title: title,
-          url: url,
-          image: image,
-          category: category,
+          id: Date.now(), title, url, image, category,
           readTime: Math.max(1, Math.floor(description.length / 200)),
-          status: "unread",
-          content: description,
-          savedAt: new Date().toISOString().split('T')[0],
-          readAt: null
+          status: "unread", content: description,
+          savedAt: new Date().toISOString().split('T')[0], readAt: null
         };
 
         articles.unshift(newArticle);
@@ -852,14 +793,9 @@
       const article = articles.find(a => a.id === id);
       if (article) {
         const cat = categories[article.category] || categories.other;
-        
         document.getElementById('readingImage').src = article.image || 'https://via.placeholder.com/800x300';
         document.getElementById('readingTitle').textContent = article.title;
-        document.getElementById('readingMeta').innerHTML = `
-          <span><i class="fa-solid ${cat.icon}"></i> ${cat.name}</span>
-          <span><i class="fa-regular fa-clock"></i> ${article.readTime} min</span>
-          <span><i class="fa-regular fa-calendar"></i> ${article.savedAt}</span>
-        `;
+        document.getElementById('readingMeta').innerHTML = `<span><i class="fa-solid ${cat.icon}"></i> ${cat.name}</span><span><i class="fa-regular fa-clock"></i> ${article.readTime} min</span><span><i class="fa-regular fa-calendar"></i> ${article.savedAt}</span>`;
         document.getElementById('readingBody').innerHTML = `<p>${article.content}</p>`;
         document.getElementById('readingModal').classList.add('active');
         
@@ -887,7 +823,6 @@
       isDarkTheme = !isDarkTheme;
       const modal = document.getElementById('readingModal');
       const body = document.getElementById('readingBody');
-      
       if (isDarkTheme) {
         modal.style.background = '#0f172a';
         body.style.color = '#e2e8f0';
@@ -904,6 +839,24 @@
       box.classList.remove('hidden');
       setTimeout(() => box.classList.add('hidden'), 3000);
     }
+
+    // === DETECTAR SCROLL EN FILTERS ===
+    function updateFiltersScroll() {
+      const filters = document.querySelector('.filters');
+      if (filters) {
+        if (filters.scrollWidth > filters.clientWidth) {
+          filters.classList.add('scrollable');
+        } else {
+          filters.classList.remove('scrollable');
+        }
+      }
+    }
+    window.addEventListener('resize', updateFiltersScroll);
+    document.addEventListener('click', function(e) {
+      if (e.target.classList.contains('filter-btn')) {
+        setTimeout(updateFiltersScroll, 100);
+      }
+    });
   </script>
 </body>
 </html>
