@@ -527,52 +527,124 @@ function eliminarDeLeerLuego(url) {
   mostrarLeerLuego();
 }
 
-// === LIMPIEZA DE CONTENIDO PARA LECTURA ===
+// === LIMPIEZA DE CONTENIDO PARA LECTURA (VERSIÓN MEJORADA) ===
 function limpiarContenido(html) {
   if (!html) return '<p>Contenido no disponible</p>';
   
-  // 1. Decodificar entidades HTML
+  // 1. Decodificar entidades HTML y escape characters
   var decoded = html
+    .replace(/\\'/g, "'")
+    .replace(/\\"/g, '"')
+    .replace(/\\\\/g, '\\')
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, ' ')
-    .replace(/&#(\d+);/g, function(match, dec) { return String.fromCharCode(dec); });
+    .replace(/&#(\d+);/g, function(match, dec) { return String.fromCharCode(dec); })
+    .replace(/\\n/g, ' ')
+    .replace(/\s+/g, ' ');
   
-  // 2. Eliminar scripts, styles, iframes, svg
+  // 2. Eliminar scripts, styles, iframes, svg, anuncios, comentarios, código JS embebido
   decoded = decoded
     .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
     .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
     .replace(/<iframe[^>]*>[\s\S]*?<\/iframe>/gi, '')
     .replace(/<svg[^>]*>[\s\S]*?<\/svg>/gi, '')
-    .replace(/<noscript[^>]*>[\s\S]*?<\/noscript>/gi, '');
+    .replace(/<noscript[^>]*>[\s\S]*?<\/noscript>/gi, '')
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<div[^>]*class=["'][^"']*ad[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, '')
+    .replace(/<div[^>]*id=["'][^"']*ad[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, '')
+    // Eliminar código JS embebido tipo "window.sliceHydration...", "const isAuthKiosq...", etc.
+    .replace(/(?:const|var|let)\s+\w+\s*=\s*window\.[^;]+;?/gi, '')
+    .replace(/(?:function|if|for|while)\s*\([^)]*\)\s*\{[\s\S]*?\}(?=\s*(?:else|function|var|const|let|<))/gi, '')
+    .replace(/window\.\w+\s*=\s*window\.\w+\s*\|\|\s*\{\};?/gi, '')
+    .replace(/\/\/[^\n]*/g, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '');
   
-  // 3. Extraer solo párrafos válidos (con texto real)
+  // 3. Extraer párrafos válidos
   var parrafos = decoded.match(/<p[^>]*>([\s\S]*?)<\/p>/gi) || [];
   var limpios = [];
+  var vistos = {};
   
   for (var i = 0; i < parrafos.length; i++) {
-    var texto = parrafos[i].replace(/<[^>]*>/g, '').trim();
-    // Solo párrafos con más de 20 caracteres y menos de 500
-    if (texto.length > 20 && texto.length < 500) {
-      // Mantener enlaces dentro del párrafo
-      var conEnlaces = parrafos[i].replace(/<a[^>]+href="([^"]+)"[^>]*>([^<]+)<\/a>/g, '<a href="$1" target="_blank" style="color:#e91e63;text-decoration:none;">$2</a>');
-      limpios.push('<p>' + conEnlaces.replace(/<[^p>][^>]*>/g, '') + '</p>');
+    var p = parrafos[i];
+    
+    // Limpiar etiquetas no deseadas, mantener formato básico
+    var limpio = p
+      .replace(/<(?!\/?(p|br|strong|em|b|i|a|ul|ol|li|blockquote|h[1-6]|span)[^>]*>)[^>]+>/gi, '')
+      .trim();
+    
+    // Obtener texto sin tags para verificar longitud
+    var texto = limpio.replace(/<[^>]*>/g, '').trim();
+    
+    // Evitar duplicados
+    if (vistos[texto]) continue;
+    vistos[texto] = true;
+    
+    // Solo párrafos con contenido real (30-800 chars)
+    if (texto.length > 30 && texto.length < 800) {
+      // Formatear enlaces
+      limpio = limpio.replace(/<a([^>]*)>/gi, function(match, attrs) {
+        var href = attrs.match(/href=["']([^"']+)["']/i);
+        if (href) {
+          return '<a href="' + href[1] + '" target="_blank" style="color:#e91e63;text-decoration:underline;font-weight:600;">';
+        }
+        return '<a>';
+      });
+      
+      // Asegurar que termine en </p>
+      if (limpio.indexOf('</p>') === -1) {
+        limpio = limpio + '</p>';
+      }
+      
+      limpios.push(limpio);
     }
   }
   
-  // 4. Si no hay párrafos válidos, usar el texto plano
+  // 4. Si no hay párrafos, intentar extraer de divs de contenido
+  if (limpios.length === 0) {
+    var divsContenido = decoded.match(/<div[^>]*class=["'][^"']*(content|article|post|entry|text)[^"']*["'][^>]*>([\s\S]*?)<\/div>/gi) || [];
+    
+    if (divsContenido.length > 0) {
+      var contenidoDiv = divsContenido[0];
+      var parrafosDiv = contenidoDiv.match(/<p[^>]*>([\s\S]*?)<\/p>/gi) || [];
+      
+      for (var j = 0; j < Math.min(12, parrafosDiv.length); j++) {
+        limpios.push(parrafosDiv[j]);
+      }
+    }
+  }
+  
+  // 5. Último recurso: crear párrafos desde texto plano
   if (limpios.length === 0) {
     var textoPlano = decoded.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-    if (textoPlano.length > 50) {
-      return '<p>' + textoPlano.substring(0, 2000) + '...</p>';
+    
+    if (textoPlano.length > 200) {
+      // Dividir en oraciones
+      var oraciones = textoPlano.match(/[^\.!\?]+[\.!\?]+/g) || [textoPlano];
+      var parrafoActual = '';
+      
+      for (var k = 0; k < oraciones.length; k++) {
+        parrafoActual += oraciones[k].trim() + ' ';
+        
+        if (parrafoActual.length > 150 || k === oraciones.length - 1) {
+          if (parrafoActual.trim().length > 50) {
+            limpios.push('<p>' + parrafoActual.trim() + '</p>');
+          }
+          parrafoActual = '';
+        }
+      }
     }
-    return '<p>Contenido no disponible</p>';
   }
   
-  // 5. Limitar a 15 párrafos máximo
+  // 6. Si aún no hay contenido
+  if (limpios.length === 0) {
+    return '<p style="color:#8a8f9e;">Contenido no disponible.</p><p><a href="#" target="_blank" style="color:#e91e63;text-decoration:underline;font-weight:600;"><i class="fas fa-external-link-alt"></i> Leer artículo original</a></p>';
+  }
+  
+  // 7. Limitar a 15 párrafos y unir
   return limpios.slice(0, 15).join('');
 }
 
