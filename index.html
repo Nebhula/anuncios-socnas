@@ -3,84 +3,109 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📖 ReadLater - Guardar Links</title>
+  <title>📖 ReadLater Pro - Guarda y Organiza</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0f172a;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
       min-height: 100vh;
-      padding: 20px;
+      padding: 15px;
       color: #e2e8f0;
     }
-    .container { max-width: 800px; margin: 0 auto; }
     
+    .container { max-width: 1200px; margin: 0 auto; }
+    
+    /* HEADER */
     .header {
       text-align: center;
-      padding: 40px 20px;
-      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-      border-radius: 16px;
-      margin-bottom: 25px;
-      border: 1px solid #475569;
+      padding: 30px 15px;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
     }
+    
     .header h1 {
       font-size: 28px;
-      font-weight: 700;
+      font-weight: 800;
       background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
+    
     .header p { color: #94a3b8; font-size: 14px; }
     
+    /* FORM */
     .form-box {
-      background: #1e293b;
-      padding: 25px;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+      padding: 20px;
       border-radius: 16px;
-      margin-bottom: 25px;
-      border: 1px solid #475569;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
     }
+    
     .form-box h3 {
       font-size: 16px;
-      font-weight: 600;
+      font-weight: 700;
       color: #f1f5f9;
       margin-bottom: 15px;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .form-box h3 i { color: #60a5fa; }
     
-    .form-row { display: flex; gap: 10px; margin-bottom: 15px; }
-    .form-row input {
-      flex: 1;
-      padding: 12px 16px;
-      background: #0f172a;
-      border: 1px solid #475569;
-      border-radius: 10px;
+    .form-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-bottom: 10px; }
+    
+    .form-group { position: relative; }
+    .form-group i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
       font-size: 14px;
+    }
+    
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 12px 12px 12px 40px;
+      background: rgba(0,0,0,0.3);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      font-size: 13px;
       color: #f1f5f9;
     }
-    .form-row input:focus { outline: none; border-color: #60a5fa; }
+    
+    .form-group input:focus, .form-group select:focus { 
+      outline: none; 
+      border-color: #60a5fa;
+    }
     
     .btn-submit {
-      width: 100%;
       background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
       color: white;
       border: none;
-      padding: 14px;
+      padding: 12px 20px;
       border-radius: 10px;
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 8px;
+      gap: 6px;
+      white-space: nowrap;
     }
-    .btn-submit:hover { opacity: 0.9; }
-    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
     
     .loading {
       display: none;
@@ -89,12 +114,11 @@
       margin-top: 15px;
       background: rgba(96, 165, 250, 0.1);
       border-radius: 10px;
-      border: 1px solid rgba(96, 165, 250, 0.3);
     }
     .loading.active { display: block; }
     .spinner {
       width: 30px; height: 30px;
-      border: 3px solid #475569;
+      border: 3px solid rgba(255,255,255,0.1);
       border-top-color: #60a5fa;
       border-radius: 50%;
       animation: spin 1s linear infinite;
@@ -102,103 +126,224 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     
+    /* ALERT */
     .alert {
       padding: 12px 16px;
       border-radius: 10px;
       margin-bottom: 15px;
-      font-weight: 500;
+      font-weight: 600;
       display: flex;
       align-items: center;
       gap: 8px;
+      font-size: 14px;
     }
-    .alert-success { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
-    .alert-error { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .alert-success { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+    .alert-error { background: rgba(239, 68, 68, 0.2); color: #f87171; }
     .hidden { display: none; }
     
-    .tabs { display: flex; gap: 8px; margin-bottom: 15px; }
-    .tab-btn {
-      background: #1e293b;
-      border: 1px solid #475569;
+    /* FILTERS */
+    .filters {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      overflow-x: auto;
+      padding-bottom: 5px;
+    }
+    
+    .filter-group {
+      display: flex;
+      gap: 6px;
+      background: rgba(255,255,255,0.05);
+      padding: 5px;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+    
+    .filter-btn {
+      background: transparent;
+      border: none;
       color: #94a3b8;
-      padding: 8px 16px;
+      padding: 8px 14px;
       border-radius: 8px;
       cursor: pointer;
       font-size: 13px;
-      font-weight: 500;
-    }
-    .tab-btn.active { background: #60a5fa; border-color: #60a5fa; color: white; }
-    
-    .article-list { display: grid; gap: 12px; }
-    
-    .article-card {
-      background: #1e293b;
-      border-radius: 12px;
-      padding: 16px;
-      border: 1px solid #475569;
-      display: grid;
-      grid-template-columns: 60px 1fr auto;
-      gap: 15px;
-      align-items: center;
-    }
-    .article-card:hover { border-color: #60a5fa; }
-    .article-card.read { opacity: 0.6; }
-    
-    .article-img {
-      width: 60px; height: 60px;
-      object-fit: cover;
-      border-radius: 8px;
-      background: #0f172a;
-    }
-    
-    .article-info h4 {
-      color: #f1f5f9;
-      font-size: 15px;
-      margin-bottom: 6px;
       font-weight: 600;
+      white-space: nowrap;
     }
-    .article-meta {
+    
+    .filter-btn:hover, .filter-btn.active { 
+      background: #60a5fa; 
+      color: white; 
+    }
+    
+    .stats {
+      display: flex;
+      gap: 15px;
+      color: #94a3b8;
+      font-size: 13px;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    
+    /* GRID LAYOUT */
+    .articles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 15px;
+    }
+    
+    /* ARTICLE CARD */
+    .article-card {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.3s;
+    }
+    
+    .article-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(96, 165, 250, 0.5);
+    }
+    
+    .article-card.read { opacity: 0.7; }
+    
+    .card-image {
+      width: 100%;
+      height: 180px;
+      overflow: hidden;
+      position: relative;
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    }
+    
+    .card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+    
+    .card-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 15px;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .card-read {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(34, 197, 94, 0.9);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 15px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    
+    .card-content { padding: 15px; }
+    
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 8px;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    .card-meta {
       display: flex;
       gap: 12px;
+      margin-bottom: 10px;
       font-size: 12px;
       color: #94a3b8;
+      flex-wrap: wrap;
     }
     
-    .article-actions { display: flex; flex-direction: column; gap: 8px; }
+    .card-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .card-description {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.5;
+      margin-bottom: 12px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    .card-url {
+      font-size: 11px;
+      color: #64748b;
+      margin-bottom: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .card-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    
+    .btn-card {
+      flex: 1;
+      min-width: 80px;
+      padding: 8px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
     
     .btn-read {
       background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
       color: white;
-      text-decoration: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 13px;
-      text-align: center;
+    }
+    
+    .btn-mark {
+      background: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
     }
     
     .btn-delete {
-      background: #0f172a;
-      border: 1px solid #475569;
-      color: #94a3b8;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
     }
-    .btn-delete:hover { background: #ef4444; border-color: #ef4444; color: white; }
     
-    .btn-mark {
-      background: #0f172a;
-      border: 1px solid #475569;
-      color: #94a3b8;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-    .btn-mark:hover { background: #22c55e; border-color: #22c55e; color: white; }
-    
-    /* MODO LECTURA */
+    /* READING MODAL */
     .reading-modal {
       display: none;
       position: fixed;
@@ -211,9 +356,9 @@
     .reading-modal.active { display: flex; }
     
     .reading-content {
-      max-width: 650px;
+      max-width: 700px;
       margin: 0 auto;
-      padding: 30px 20px;
+      padding: 20px 15px;
       width: 100%;
     }
     
@@ -221,19 +366,21 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
       padding-bottom: 15px;
-      border-bottom: 1px solid #475569;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      flex-wrap: wrap;
+      gap: 10px;
     }
     
-    .reading-controls { display: flex; gap: 8px; }
+    .reading-controls { display: flex; gap: 8px; flex-wrap: wrap; }
     
     .control-btn {
-      background: #1e293b;
-      border: 1px solid #475569;
+      background: rgba(255,255,255,0.1);
+      border: none;
       color: #94a3b8;
-      padding: 6px 10px;
-      border-radius: 6px;
+      padding: 8px 12px;
+      border-radius: 8px;
       cursor: pointer;
       font-size: 13px;
     }
@@ -243,60 +390,124 @@
       background: #ef4444;
       border: none;
       color: white;
-      padding: 6px 14px;
-      border-radius: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
       cursor: pointer;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 13px;
+    }
+    
+    .reading-image {
+      width: 100%;
+      max-height: 300px;
+      object-fit: cover;
+      object-position: center;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
     }
     
     .reading-title {
       font-size: 24px;
-      font-weight: 700;
+      font-weight: 800;
       color: #f1f5f9;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
       line-height: 1.3;
     }
     
     .reading-meta {
+      display: flex;
+      gap: 15px;
       color: #94a3b8;
       font-size: 13px;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
-    .reading-meta a { color: #60a5fa; }
     
     .reading-body {
-      font-size: 17px;
+      font-size: 16px;
       line-height: 1.7;
       color: #e2e8f0;
     }
-    .reading-body p { margin-bottom: 18px; }
-    .reading-body img { max-width: 100%; border-radius: 12px; margin: 15px 0; }
+    .reading-body p { margin-bottom: 15px; word-wrap: break-word; }
+    .reading-body img { 
+      max-width: 100%; 
+      height: auto;
+      border-radius: 12px; 
+      margin: 15px 0; 
+    }
     
+    /* EMPTY STATE */
     .empty-state {
       text-align: center;
       padding: 50px 20px;
-      background: #1e293b;
+      background: rgba(255,255,255,0.05);
       border-radius: 16px;
-      border: 1px solid #475569;
+      border: 2px dashed rgba(255,255,255,0.1);
+      grid-column: 1 / -1;
     }
-    .empty-state i { font-size: 48px; color: #475569; margin-bottom: 15px; }
-    .empty-state h3 { color: #f1f5f9; margin-bottom: 8px; font-size: 18px; }
+    .empty-state i { font-size: 60px; color: #475569; margin-bottom: 15px; }
+    .empty-state h3 { color: #f1f5f9; margin-bottom: 8px; font-size: 20px; }
     .empty-state p { color: #94a3b8; font-size: 14px; }
     
+    /* FOOTER */
     .footer {
       text-align: center;
-      padding: 25px;
+      padding: 30px;
       color: #64748b;
-      font-size: 12px;
-      margin-top: 30px;
-      border-top: 1px solid #475569;
+      font-size: 13px;
+      margin-top: 40px;
+      border-top: 1px solid rgba(255,255,255,0.1);
     }
     
-    @media (max-width: 600px) {
-      .form-row { flex-direction: column; }
-      .article-card { grid-template-columns: 1fr; }
-      .article-img { width: 100%; height: 120px; }
+    /* MEDIA QUERIES */
+    @media (max-width: 768px) {
+      body { padding: 10px; }
+      
+      .form-row { grid-template-columns: 1fr; }
+      
+      .btn-submit {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .articles-grid { grid-template-columns: 1fr; }
+      
+      .card-image { height: 200px; }
+      
+      .filters {
+        flex-direction: column;
+      }
+      
+      .filter-group {
+        width: 100%;
+        overflow-x: auto;
+      }
+      
+      .stats {
+        margin-left: 0;
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 10px;
+      }
+      
+      .reading-title { font-size: 20px; }
+      .reading-image { max-height: 250px; }
+      .reading-controls { width: 100%; justify-content: center; }
+      .btn-close { width: 100%; justify-content: center; }
+    }
+    
+    @media (max-width: 480px) {
+      .header h1 { font-size: 24px; }
+      .card-image { height: 180px; }
+      .card-title { font-size: 15px; }
+      .card-actions { flex-direction: column; }
+      .btn-card { width: 100%; }
+      .reading-image { max-height: 200px; }
+      .reading-title { font-size: 18px; }
+      .reading-body { font-size: 15px; }
     }
   </style>
 </head>
@@ -304,8 +515,8 @@
   <div class="container">
     
     <div class="header">
-      <h1><i class="fa-solid fa-book-open"></i> ReadLater</h1>
-      <p>Guarda artículos de cualquier URL. Lee sin distracciones.</p>
+      <h1><i class="fa-solid fa-book-open-reader"></i> ReadLater Pro</h1>
+      <p>Guarda, organiza y lee artículos sin distracciones</p>
     </div>
 
     <div id="alertBox" class="alert hidden"></div>
@@ -314,30 +525,82 @@
       <h3><i class="fa-solid fa-plus-circle"></i> Guardar Nuevo Artículo</h3>
       
       <div class="form-row">
-        <input type="url" id="articleUrl" placeholder="Pega la URL del artículo...">
+        <div class="form-group">
+          <i class="fa-solid fa-link"></i>
+          <input type="url" id="articleUrl" placeholder="Pega la URL del artículo...">
+        </div>
+        <div class="form-group">
+          <i class="fa-solid fa-folder"></i>
+          <select id="articleCategory">
+            <option value="tech">💻 Tecnología</option>
+            <option value="science">🔬 Ciencia</option>
+            <option value="business">💼 Negocios</option>
+            <option value="design">🎨 Diseño</option>
+            <option value="health">🏥 Salud</option>
+            <option value="entertainment">🎬 Entretenimiento</option>
+            <option value="sports">⚽ Deportes</option>
+            <option value="other">📌 Otros</option>
+          </select>
+        </div>
+        <button class="btn-submit" id="submitBtn" onclick="saveArticle()">
+          <i class="fa-solid fa-bookmark"></i>
+          <span>Guardar</span>
+        </button>
       </div>
-      
-      <button class="btn-submit" id="submitBtn" onclick="saveArticle()">
-        <i class="fa-solid fa-bookmark"></i>
-        <span>Extraer y Guardar</span>
-      </button>
       
       <div class="loading" id="loading">
         <div class="spinner"></div>
-        <p>Extrayendo contenido...</p>
+        <p><i class="fa-solid fa-spinner fa-spin"></i> Extrayendo contenido...</p>
       </div>
     </div>
 
-    <div class="tabs">
-      <button class="tab-btn active" onclick="filterArticles('all')">📚 Todos</button>
-      <button class="tab-btn" onclick="filterArticles('unread')">📖 Por Leer</button>
-      <button class="tab-btn" onclick="filterArticles('read')">✅ Leídos</button>
+    <div class="filters">
+      <div class="filter-group">
+        <button class="filter-btn active" onclick="filterCategory('all')">
+          <i class="fa-solid fa-layer-group"></i> Todos
+        </button>
+        <button class="filter-btn" onclick="filterCategory('tech')">
+          <i class="fa-solid fa-laptop"></i> Tecnología
+        </button>
+        <button class="filter-btn" onclick="filterCategory('science')">
+          <i class="fa-solid fa-flask"></i> Ciencia
+        </button>
+        <button class="filter-btn" onclick="filterCategory('business')">
+          <i class="fa-solid fa-briefcase"></i> Negocios
+        </button>
+        <button class="filter-btn" onclick="filterCategory('design')">
+          <i class="fa-solid fa-palette"></i> Diseño
+        </button>
+      </div>
+      
+      <div class="filter-group">
+        <button class="filter-btn" onclick="filterStatus('all')">
+          <i class="fa-solid fa-list"></i> Todos
+        </button>
+        <button class="filter-btn" onclick="filterStatus('unread')">
+          <i class="fa-solid fa-eye"></i> Por Leer
+        </button>
+        <button class="filter-btn" onclick="filterStatus('read')">
+          <i class="fa-solid fa-check"></i> Leídos
+        </button>
+      </div>
+      
+      <div class="stats">
+        <div class="stat-item">
+          <i class="fa-solid fa-book"></i>
+          <span id="totalCount">0 artículos</span>
+        </div>
+        <div class="stat-item">
+          <i class="fa-solid fa-check-circle"></i>
+          <span id="readCount">0 leídos</span>
+        </div>
+      </div>
     </div>
 
-    <div class="article-list" id="articleList"></div>
+    <div class="articles-grid" id="articleList"></div>
 
     <div class="footer">
-      <p><i class="fa-solid fa-bolt"></i> Contenido extraído con microlink.io</p>
+      <p><i class="fa-solid fa-bolt"></i> Contenido extraído automáticamente | <i class="fa-solid fa-database"></i> Guardado en tu navegador</p>
     </div>
 
   </div>
@@ -346,7 +609,9 @@
   <div class="reading-modal" id="readingModal">
     <div class="reading-content">
       <div class="reading-header">
-        <button class="btn-close" onclick="closeReading()">← Volver</button>
+        <button class="btn-close" onclick="closeReading()">
+          <i class="fa-solid fa-arrow-left"></i> Volver
+        </button>
         <div class="reading-controls">
           <button class="control-btn" onclick="changeFontSize(-1)">A-</button>
           <button class="control-btn" onclick="changeFontSize(1)">A+</button>
@@ -354,6 +619,7 @@
         </div>
       </div>
       
+      <img src="" alt="" class="reading-image" id="readingImage">
       <h1 class="reading-title" id="readingTitle"></h1>
       <div class="reading-meta" id="readingMeta"></div>
       <div class="reading-body" id="readingBody"></div>
@@ -361,80 +627,118 @@
   </div>
 
   <script>
-    // Cargar artículos desde localStorage
+    const categories = {
+      tech: { icon: 'fa-laptop', name: 'Tecnología', color: '#60a5fa' },
+      science: { icon: 'fa-flask', name: 'Ciencia', color: '#10b981' },
+      business: { icon: 'fa-briefcase', name: 'Negocios', color: '#f59e0b' },
+      design: { icon: 'fa-palette', name: 'Diseño', color: '#ec4899' },
+      health: { icon: 'fa-heart-pulse', name: 'Salud', color: '#ef4444' },
+      entertainment: { icon: 'fa-film', name: 'Entretenimiento', color: '#8b5cf6' },
+      sports: { icon: 'fa-futbol', name: 'Deportes', color: '#22c55e' },
+      other: { icon: 'fa-folder', name: 'Otros', color: '#64748b' }
+    };
+
     let articles = [];
     try {
-      const saved = localStorage.getItem('readLaterArticles');
+      const saved = localStorage.getItem('readLaterProArticles');
       if (saved) articles = JSON.parse(saved);
     } catch(e) {}
 
-    let currentFontSize = 17;
+    let currentFontSize = 16;
     let isDarkTheme = true;
+    let currentCategory = 'all';
+    let currentStatus = 'all';
 
-    // Guardar en localStorage
     function saveToStorage() {
       try {
-        localStorage.setItem('readLaterArticles', JSON.stringify(articles));
+        localStorage.setItem('readLaterProArticles', JSON.stringify(articles));
       } catch(e) {}
     }
 
-    // Actualizar contador
     function updateStats() {
       const total = articles.length;
       const read = articles.filter(a => a.status === 'read').length;
-      document.title = `📖 ReadLater (${total})`;
+      document.getElementById('totalCount').textContent = `${total} artículos`;
+      document.getElementById('readCount').textContent = `${read} leídos`;
+      document.title = `📖 ReadLater Pro (${total})`;
     }
 
-    // Cargar al inicio
     window.onload = function() { 
-      renderArticles('all'); 
+      renderArticles(); 
       updateStats(); 
     };
 
-    // Renderizar lista de artículos
-    function renderArticles(filter) {
+    function renderArticles() {
       const container = document.getElementById('articleList');
       
       let filtered = articles;
-      if (filter === 'unread') filtered = articles.filter(a => a.status === 'unread');
-      if (filter === 'read') filtered = articles.filter(a => a.status === 'read');
+      
+      if (currentCategory !== 'all') {
+        filtered = filtered.filter(a => a.category === currentCategory);
+      }
+      
+      if (currentStatus !== 'all') {
+        filtered = filtered.filter(a => a.status === currentStatus);
+      }
       
       if (filtered.length === 0) {
         container.innerHTML = `
           <div class="empty-state">
-            <i class="fa-regular fa-folder-open"></i>
+            <i class="fa-solid fa-inbox"></i>
             <h3>No hay artículos</h3>
-            <p>${filter === 'unread' ? '¡Todos leídos!' : 'Guarda tu primer artículo'}</p>
+            <p>${currentStatus === 'unread' ? '¡Todos leídos! 🎉' : 'Guarda tu primer artículo'}</p>
           </div>
         `;
         return;
       }
 
       container.innerHTML = '';
+      
+      filtered.sort((a, b) => {
+        if (a.status === 'unread' && b.status === 'read') return -1;
+        if (a.status === 'read' && b.status === 'unread') return 1;
+        return new Date(b.savedAt) - new Date(a.savedAt);
+      });
 
       filtered.forEach(article => {
+        const cat = categories[article.category] || categories.other;
         const card = document.createElement('div');
         card.className = 'article-card' + (article.status === 'read' ? ' read' : '');
         
         card.innerHTML = `
-          <img src="${article.image || 'https://via.placeholder.com/60'}" alt="" class="article-img" onerror="this.src='https://via.placeholder.com/60'">
-          
-          <div class="article-info">
-            <h4>${article.title}</h4>
-            <div class="article-meta">
-              <span><i class="fa-regular fa-clock"></i> ${article.readTime} min</span>
-              <span><i class="fa-regular fa-calendar"></i> ${article.savedAt}</span>
-              ${article.status === 'read' ? `<span><i class="fa-solid fa-check"></i> Leído</span>` : ''}
+          <div class="card-image">
+            <img src="${article.image || 'https://via.placeholder.com/400x200'}" alt="" onerror="this.src='https://via.placeholder.com/400x200'">
+            <div class="card-badge">
+              <i class="fa-solid ${cat.icon}"></i>
+              ${cat.name}
             </div>
-            <p style="color: #64748b; font-size: 11px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${article.url}</p>
+            ${article.status === 'read' ? '<div class="card-read"><i class="fa-solid fa-check"></i> Leído</div>' : ''}
           </div>
           
-          <div class="article-actions">
-            ${article.status === 'unread' ? `<a href="#" class="btn-read" onclick="openReading(${article.id})">Leer</a>` : ''}
-            <button class="btn-mark" onclick="toggleRead(${article.id})">
-              ${article.status === 'read' ? '🔄 No leído' : '✅ Leído'}
-            </button>
-            <button class="btn-delete" onclick="deleteArticle(${article.id})">🗑️ Eliminar</button>
+          <div class="card-content">
+            <h3 class="card-title">${article.title}</h3>
+            
+            <div class="card-meta">
+              <span><i class="fa-regular fa-clock"></i> ${article.readTime} min</span>
+              <span><i class="fa-regular fa-calendar"></i> ${article.savedAt}</span>
+            </div>
+            
+            <p class="card-description">${article.content}</p>
+            
+            <div class="card-actions">
+              ${article.status === 'unread' ? `
+                <button class="btn-card btn-read" onclick="openReading(${article.id})">
+                  <i class="fa-solid fa-book-open"></i> Leer
+                </button>
+              ` : ''}
+              <button class="btn-card btn-mark" onclick="toggleRead(${article.id})">
+                <i class="fa-solid ${article.status === 'read' ? 'fa-rotate-left' : 'fa-check'}"></i>
+                ${article.status === 'read' ? 'No leído' : 'Leído'}
+              </button>
+              <button class="btn-card btn-delete" onclick="deleteArticle(${article.id})">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
           </div>
         `;
         
@@ -442,9 +746,9 @@
       });
     }
 
-    // === GUARDAR ARTÍCULO CON EXTRACCIÓN REAL ===
     async function saveArticle() {
       const url = document.getElementById('articleUrl').value.trim();
+      const category = document.getElementById('articleCategory').value;
       const submitBtn = document.getElementById('submitBtn');
       const loading = document.getElementById('loading');
 
@@ -457,7 +761,6 @@
       loading.classList.add('active');
 
       try {
-        // === LLAMADA A MICROLINK.IO API ===
         const apiUrl = 'https://api.microlink.io/?url=' + encodeURIComponent(url) + '&meta=true';
         const response = await fetch(apiUrl);
         const data = await response.json();
@@ -470,7 +773,7 @@
           image = data.data.image ? (data.data.image.url || data.data.image) : '';
         } else {
           title = 'Artículo de ' + new URL(url).hostname;
-          description = 'Contenido extraído de ' + url;
+          description = 'Contenido extraído';
           image = '';
         }
         
@@ -479,6 +782,7 @@
           title: title,
           url: url,
           image: image,
+          category: category,
           readTime: Math.max(1, Math.floor(description.length / 200)),
           status: "unread",
           content: description,
@@ -488,14 +792,13 @@
 
         articles.unshift(newArticle);
         saveToStorage();
-        renderArticles('all');
+        renderArticles();
         updateStats();
 
         document.getElementById('articleUrl').value = '';
-        showAlert('✅ Artículo guardado: ' + title.substring(0, 40) + '...', 'success');
+        showAlert(`✅ Guardado en ${categories[category].name}`, 'success');
         
       } catch (error) {
-        console.error('Error:', error);
         showAlert('❌ Error: ' + error.message, 'error');
       }
 
@@ -503,65 +806,74 @@
       submitBtn.disabled = false;
     }
 
-    // Marcar como leído/no leído
     function toggleRead(id) {
       const article = articles.find(a => a.id === id);
       if (article) {
         article.status = article.status === 'read' ? 'unread' : 'read';
         article.readAt = article.status === 'read' ? new Date().toISOString().split('T')[0] : null;
         saveToStorage();
-        renderArticles('all');
+        renderArticles();
         updateStats();
       }
     }
 
-    // Eliminar artículo
     function deleteArticle(id) {
-      articles = articles.filter(a => a.id !== id);
-      saveToStorage();
-      renderArticles('all');
-      updateStats();
-      showAlert('🗑️ Eliminado', 'success');
+      if (confirm('¿Eliminar este artículo?')) {
+        articles = articles.filter(a => a.id !== id);
+        saveToStorage();
+        renderArticles();
+        updateStats();
+        showAlert('🗑️ Eliminado', 'success');
+      }
     }
 
-    // Filtrar artículos
-    function filterArticles(filter) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    function filterCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
       event.target.classList.add('active');
-      renderArticles(filter);
+      renderArticles();
     }
 
-    // Abrir modo lectura
+    function filterStatus(status) {
+      currentStatus = status;
+      renderArticles();
+    }
+
     function openReading(id) {
       const article = articles.find(a => a.id === id);
       if (article) {
+        const cat = categories[article.category] || categories.other;
+        
+        document.getElementById('readingImage').src = article.image || 'https://via.placeholder.com/800x300';
         document.getElementById('readingTitle').textContent = article.title;
-        document.getElementById('readingMeta').innerHTML = `${article.readTime} min · <a href="${article.url}" target="_blank">Ver original →</a>`;
-        document.getElementById('readingBody').innerHTML = `<p>${article.content}</p><p style="margin-top:25px;padding-top:15px;border-top:1px solid #475569;"><a href="${article.url}" target="_blank" style="color: #60a5fa;">🔗 Leer completo en el sitio original</a></p>`;
+        document.getElementById('readingMeta').innerHTML = `
+          <span><i class="fa-solid ${cat.icon}"></i> ${cat.name}</span>
+          <span><i class="fa-regular fa-clock"></i> ${article.readTime} min</span>
+          <span><i class="fa-regular fa-calendar"></i> ${article.savedAt}</span>
+        `;
+        document.getElementById('readingBody').innerHTML = `<p>${article.content}</p>`;
         document.getElementById('readingModal').classList.add('active');
         
         article.status = 'read';
         article.readAt = new Date().toISOString().split('T')[0];
         saveToStorage();
         updateStats();
+        setTimeout(() => renderArticles(), 100);
       }
     }
 
-    // Cerrar modo lectura
     function closeReading() {
       document.getElementById('readingModal').classList.remove('active');
-      renderArticles('all');
+      renderArticles();
     }
 
-    // Cambiar tamaño de fuente
     function changeFontSize(delta) {
       currentFontSize += delta;
       if (currentFontSize < 14) currentFontSize = 14;
-      if (currentFontSize > 24) currentFontSize = 24;
+      if (currentFontSize > 22) currentFontSize = 22;
       document.getElementById('readingBody').style.fontSize = currentFontSize + 'px';
     }
 
-    // Cambiar tema claro/oscuro
     function toggleTheme() {
       isDarkTheme = !isDarkTheme;
       const modal = document.getElementById('readingModal');
@@ -576,13 +888,12 @@
       }
     }
 
-    // Mostrar alerta
     function showAlert(msg, type) {
       const box = document.getElementById('alertBox');
-      box.textContent = msg;
+      box.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${msg}`;
       box.className = 'alert alert-' + type;
       box.classList.remove('hidden');
-      setTimeout(() => box.classList.add('hidden'), 4000);
+      setTimeout(() => box.classList.add('hidden'), 3000);
     }
   </script>
 </body>
