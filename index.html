@@ -141,14 +141,29 @@
     .alert-error { background: rgba(239, 68, 68, 0.2); color: #f87171; }
     .hidden { display: none; }
     
-    /* FILTERS */
+    /* ===== FILTERS MEJORADOS ===== */
     .filters {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       margin-bottom: 20px;
-      flex-wrap: wrap;
-      overflow-x: auto;
-      padding-bottom: 5px;
+      flex-wrap: nowrap; /* ← IMPORTANTE: no wrap */
+      overflow-x: auto;  /* ← Scroll horizontal */
+      padding-bottom: 8px;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch; /* Smooth en iOS */
+    }
+    
+    /* Ocultar scrollbar pero mantener funcionalidad */
+    .filters::-webkit-scrollbar {
+      height: 4px;
+    }
+    .filters::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.05);
+      border-radius: 2px;
+    }
+    .filters::-webkit-scrollbar-thumb {
+      background: rgba(96, 165, 250, 0.5);
+      border-radius: 2px;
     }
     
     .filter-group {
@@ -157,19 +172,21 @@
       background: rgba(255,255,255,0.05);
       padding: 5px;
       border-radius: 10px;
-      flex-shrink: 0;
+      flex-shrink: 0; /* ← No encoger */
     }
     
     .filter-btn {
       background: transparent;
       border: none;
       color: #94a3b8;
-      padding: 8px 14px;
+      padding: 8px 16px; /* ← Un poco más ancho */
       border-radius: 8px;
       cursor: pointer;
       font-size: 13px;
       font-weight: 600;
-      white-space: nowrap;
+      white-space: nowrap; /* ← Texto en una línea */
+      flex-shrink: 0;
+      transition: all 0.2s;
     }
     
     .filter-btn:hover, .filter-btn.active { 
@@ -185,6 +202,7 @@
       margin-left: auto;
       flex-shrink: 0;
     }
+    /* =========================== */
     
     /* GRID LAYOUT */
     .articles-grid {
@@ -478,11 +496,11 @@
       .card-image { height: 200px; }
       
       .filters {
-        flex-direction: column;
+        flex-wrap: nowrap; /* ← Mantener scroll en móvil */
       }
       
       .filter-group {
-        width: 100%;
+        width: auto; /* ← No forzar full width */
         overflow-x: auto;
       }
       
@@ -531,16 +549,18 @@
         </div>
         <div class="form-group">
           <i class="fa-solid fa-folder"></i>
+          <!-- === SELECT SIN EMOJIS (PRO) === -->
           <select id="articleCategory">
-            <option value="tech">💻 Tecnología</option>
-            <option value="science">🔬 Ciencia</option>
-            <option value="business">💼 Negocios</option>
-            <option value="design">🎨 Diseño</option>
-            <option value="health">🏥 Salud</option>
-            <option value="entertainment">🎬 Entretenimiento</option>
-            <option value="sports">⚽ Deportes</option>
-            <option value="other">📌 Otros</option>
+            <option value="tech">Tecnología</option>
+            <option value="science">Ciencia</option>
+            <option value="business">Negocios</option>
+            <option value="design">Diseño</option>
+            <option value="health">Salud</option>
+            <option value="entertainment">Entretenimiento</option>
+            <option value="sports">Deportes</option>
+            <option value="other">Otros</option>
           </select>
+          <!-- ============================== -->
         </div>
         <button class="btn-submit" id="submitBtn" onclick="saveArticle()">
           <i class="fa-solid fa-bookmark"></i>
@@ -554,35 +574,22 @@
       </div>
     </div>
 
+    <!-- === FILTERS CON SCROLL HORIZONTAL === -->
     <div class="filters">
       <div class="filter-group">
-        <button class="filter-btn active" onclick="filterCategory('all')">
-          <i class="fa-solid fa-layer-group"></i> Todos
-        </button>
-        <button class="filter-btn" onclick="filterCategory('tech')">
-          <i class="fa-solid fa-laptop"></i> Tecnología
-        </button>
-        <button class="filter-btn" onclick="filterCategory('science')">
-          <i class="fa-solid fa-flask"></i> Ciencia
-        </button>
-        <button class="filter-btn" onclick="filterCategory('business')">
-          <i class="fa-solid fa-briefcase"></i> Negocios
-        </button>
-        <button class="filter-btn" onclick="filterCategory('design')">
-          <i class="fa-solid fa-palette"></i> Diseño
-        </button>
+        <button class="filter-btn active" onclick="filterCategory('all')">Todos</button>
+        <button class="filter-btn" onclick="filterCategory('tech')">Tecnología</button>
+        <button class="filter-btn" onclick="filterCategory('science')">Ciencia</button>
+        <button class="filter-btn" onclick="filterCategory('business')">Negocios</button>
+        <button class="filter-btn" onclick="filterCategory('design')">Diseño</button>
+        <button class="filter-btn" onclick="filterCategory('health')">Salud</button>
+        <button class="filter-btn" onclick="filterCategory('entertainment')">Entretenimiento</button>
       </div>
       
       <div class="filter-group">
-        <button class="filter-btn" onclick="filterStatus('all')">
-          <i class="fa-solid fa-list"></i> Todos
-        </button>
-        <button class="filter-btn" onclick="filterStatus('unread')">
-          <i class="fa-solid fa-eye"></i> Por Leer
-        </button>
-        <button class="filter-btn" onclick="filterStatus('read')">
-          <i class="fa-solid fa-check"></i> Leídos
-        </button>
+        <button class="filter-btn active" onclick="filterStatus('all')">Todos</button>
+        <button class="filter-btn" onclick="filterStatus('unread')">Por Leer</button>
+        <button class="filter-btn" onclick="filterStatus('read')">Leídos</button>
       </div>
       
       <div class="stats">
@@ -596,6 +603,7 @@
         </div>
       </div>
     </div>
+    <!-- ==================================== -->
 
     <div class="articles-grid" id="articleList"></div>
 
@@ -627,6 +635,7 @@
   </div>
 
   <script>
+    // === CATEGORÍAS (iconos SOLO para badges, NO para select) ===
     const categories = {
       tech: { icon: 'fa-laptop', name: 'Tecnología', color: '#60a5fa' },
       science: { icon: 'fa-flask', name: 'Ciencia', color: '#10b981' },
@@ -712,7 +721,7 @@
               <i class="fa-solid ${cat.icon}"></i>
               ${cat.name}
             </div>
-            ${article.status === 'read' ? '<div class="card-read"><i class="fa-solid fa-check"></i> Leído</div>' : ''}
+            ${article.status === 'read' ? '<div class="card-badge" style="left:auto;right:8px;background:rgba(34,197,94,0.9)"><i class="fa-solid fa-check"></i></div>' : ''}
           </div>
           
           <div class="card-content">
