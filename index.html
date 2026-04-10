@@ -718,8 +718,7 @@
       loading.classList.add('active');
 
       try {
-        const api = `https://api.microlink.io/?url=${encodeURIComponent(url)}&meta=true&screenshot=true`
-
+        const apiUrl = 'https://api.microlink.io/?url=' + encodeURIComponent(url) + '&meta=true';
         const response = await fetch(apiUrl);
         const data = await response.json();
         
@@ -736,7 +735,7 @@
         
         const newArticle = {
           id: Date.now(), title, url, image, category,
-          readTime: Math.max(1, Math.floor(description.length / 2200)),
+          readTime: Math.max(1, Math.floor(description.length / 200)),
           status: "unread", content: description,
           savedAt: new Date().toISOString().split('T')[0], readAt: null
         };
